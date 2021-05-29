@@ -4,12 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.BufferedInputStream;
@@ -18,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     Button search;
     TextView show;
     String APIKEYweather = "fdbcfef5d14487a138b55af24d1cf470";
+
+    final String[] temp = {""};
 
     // Paso 3:
     // crear clase para obtener datos del clima
@@ -77,8 +86,31 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            //asignar resultado al campo en el layout
-            show.setText(result);
+            //asignar resultado al campo en el layout defrente sin setear
+            //show.setText(result);
+
+
+            try {
+                //Setear en JSON
+                JSONObject root = new JSONObject(result);
+                //Obtener los datos del valor "main" en json
+                //JSONObject listaCiudades = root.getJSONObject("list");
+                //JSONObject jsonObjectNuevo = jsonObjectSTART.getJSONObject("main");
+
+
+                String datanew = root.getString("list");
+
+
+                //Log.e("Data", weatherinfo);
+                //Log.e("Data", datanew);
+
+                //asignar valores
+                show.setText(datanew);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("Error", "Error");
+            }
 
         }
     }
@@ -111,7 +143,19 @@ public class MainActivity extends AppCompatActivity {
                 // llamar a la clase para obtener los valores
                 getWeather task = new getWeather();
                 //Ejecutar la tarea y enviar la URL
-                task.execute(url);
+                try {
+                    temp [0]=task.execute(url).get();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if(temp[0] == null)
+                {
+
+                    show.setText("No se puede encontrar");
+                }
 
             }
         });
